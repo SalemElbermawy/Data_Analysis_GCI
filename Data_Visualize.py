@@ -24,12 +24,12 @@ if data :
 
     st.write("---")
 
-    correct_cols=list(data.select_dtypes(include=["str","number"]).columns)
+    correct_cols=list(data.select_dtypes(include=["object","number"]).columns)
     
     
     data=data.fillna(data.mean(numeric_only=True))
     
-    cat_cols_pre=list(data.select_dtypes(include="str").columns)
+    cat_cols_pre=list(data.select_dtypes(include="object").columns)
     
     for c in cat_cols_pre :
         data[c]=data[c].fillna(data[c].mode()[0])
@@ -179,7 +179,7 @@ if data :
         
         graph_type= st.selectbox("",options=["Bar Plot"])
         
-        cat_cols=list(data.select_dtypes(include="str").columns)
+        cat_cols=list(data.select_dtypes(include="object").columns)
         num_cols=list(data.select_dtypes(include="number").columns)
         
         if len(cat_cols) == 0 or len(num_cols)==0:
