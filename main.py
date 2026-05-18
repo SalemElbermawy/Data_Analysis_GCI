@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
 import streamlit as st
+import seaborn as sns 
+import matplotlib.pyplot as plt
+
 
 st.markdown("""
             
@@ -22,7 +25,14 @@ if data :
     st.write("---")
 
     correct_cols=list(data.select_dtypes(include=["str","number"]).columns)
-    data=data.fillna(data.mean())
+    
+    
+    data=data.fillna(data.mean(numeric_only=True))
+    
+    cat_cols_pre=list(data.select_dtypes(include="str").columns)
+    
+    for c in cat_cols_pre :
+        data[c]=data[c].fillna(data[c].mode()[0])
 
     data=data[correct_cols]
 
@@ -56,19 +66,19 @@ if data :
                     
               <h5>Choose the operation on the data </h5>      
                     """,unsafe_allow_html=True)
-        choosen_operation=st.multiselect("",options=["Mean","Median"])
+        choosen_operation=st.selectbox("",options=["Mean","Median"])
         st.markdown("""
                     
               <h5>Choose the columns which you want to implement the operation on them </h5>      
                     """,unsafe_allow_html=True)
         correct_cols.remove(choosen_group)
-        operation_cols=st.multiselect("",options=correct_cols)
+        operation_cols=st.multiselect("",options=data.select_dtypes(include="number").columns)
         
-        if choosen_operation=="Main":
-            group_data=data.groupby(choosen_group)
-            st.write(group_data[operation_cols].mean())
+        if choosen_operation=="Mean":
+            group_data=data.groupby(choosen_group)[operation_cols].mean()
+            st.write(group_data)
             
-        if choosen_operation=="Median":
+        elif choosen_operation=="Median":
             group_data=data.groupby(choosen_group)
             st.write(group_data[operation_cols].median())
         
@@ -101,10 +111,101 @@ if data :
             x_axis=st.selectbox("Choose The Column On X-axis",options=numerical_cols)
             y_axis=st.selectbox("Choose The Column On Y-axis",options=numerical_cols)
             
+            fig,ax=plt.subplots(figsize=(9,5))
+            
+            sns.scatterplot(
+                data=data,
+                x=x_axis,
+                y=y_axis,
+                ax=ax
+            )
+            plt.grid(True)
+            st.pyplot(fig)
+            
+        elif graph_type == "Line":
+            x_axis=st.selectbox("Choose The Column On X-axis",options=numerical_cols)
+            y_axis=st.selectbox("Choose The Column On Y-axis",options=numerical_cols)
+            
+            fig,ax=plt.subplots(figsize=(9,5))
+            
+            sns.lineplot(
+                data=data,
+                x=x_axis,
+                y=y_axis,
+                ax=ax
+            )
+            plt.grid(True)
+            st.pyplot(fig)
+            
+        elif graph_type == "Box Plot":
+            
+            x_axis=st.selectbox("Choose The Column",options=numerical_cols)
+            
+            fig,ax=plt.subplots(figsize=(9,5))
+            
+            sns.boxenplot(
+                data=data,
+                x=x_axis,
+                ax=ax,
+            )
+            plt.grid(True)
+            st.pyplot(fig)
+        
+        elif graph_type == "Hist":
+            
+            x_axis=st.selectbox("Choose The Column",options=numerical_cols)
+            
+            fig,ax=plt.subplots(figsize=(9,5))
+            
+            sns.histplot(
+                data=data,
+                x=x_axis,
+                ax=ax,
+            )
+            plt.grid(True)
+            st.pyplot(fig)
+        
+        
+            
+            
+            
+            
+            
+        
+            
             
     with tab2:
-        st.header("")
-        st.selectbox("",options=[])
+        st.subheader("Welcome to present your categorical data")
+        
+        graph_type= st.selectbox("",options=["Bar Plot"])
+        
+        cat_cols=list(data.select_dtypes(include="str").columns)
+        num_cols=list(data.select_dtypes(include="number").columns)
+        
+        if len(cat_cols) == 0 or len(num_cols)==0:
+            st.info("There No Categorical Columns or Numerical ")
+        else:
+            if graph_type == "Bar Plot":
+                
+                x_axis=st.selectbox("Choose Categorical Column",options=cat_cols)
+                y_axis=st.selectbox("Choose numerical column",options=num_cols)
+                
+                
+                fig,ax=plt.subplots(figsize=(9,5))
+                
+                sns.barplot(
+                    data=data,
+                    x=x_axis,
+                    y=y_axis
+                )
+                plt.grid(True)
+                
+                st.pyplot(fig)
+                
+           
+            
+            
+        
         
     
     
